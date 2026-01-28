@@ -1,29 +1,29 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const app = express();
+require('dotenv').config();
 
-// আমরা যে রাউট বানিয়েছি সেটা এখানে আনলাম
+const app = express();
 const authRoute = require('./routes/auth');
 
-// মিডলওয়্যার
 app.use(cors());
 app.use(express.json());
 
-// ডাটাবেস কানেকশন
-mongoose.connect('mongodb://127.0.0.1:27017/bettingProDB')
+// 🔥 ডাটাবেস কানেকশন (স্মার্ট পদ্ধতি)
+const dbURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bettingProDB';
+
+mongoose.connect(dbURI)
     .then(() => console.log('✅ MongoDB Connected Successfully'))
     .catch(err => console.error('❌ Connection Error:', err));
 
-// রাউট ব্যবহার করা (API Route)
 app.use('/api', authRoute);
 
-// হোম রাউট
 app.get('/', (req, res) => {
-    res.send('Imrul Boss, Server is Ready for Registration!');
+    res.send('Imrul Boss, Server is Ready and DB Connected!');
 });
 
-// সার্ভার পোর্ট
-app.listen(5000, () => {
-    console.log('Server is running on port 5000');
+// সার্ভার পোর্ট (Render এর জন্য ডাইনামিক পোর্ট জরুরি)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
