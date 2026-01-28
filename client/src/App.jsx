@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 
-// 🔥 LIVE SERVER LINK (Connected)
+// 🔥 LIVE SERVER LINK
 const API_URL = 'https://betpro-server.onrender.com'; 
 
 function App() {
@@ -69,7 +69,7 @@ function App() {
   if (!user && !isAdmin) {
     return (
       <div style={{padding:'50px 20px', textAlign:'center', background:'#0b1e28', height:'100vh'}}>
-        <h1 className="logo-text" style={{fontSize:'50px', marginBottom:'40px'}}>Okzz<span style={{color:'white'}}>Pro</span></h1>
+        <h1 className="logo-text" style={{fontSize:'40px', marginBottom:'40px'}}>Okzz<span style={{color:'white'}}>Pro Live</span></h1>
         
         <div style={{background:'#142832', padding:'30px', borderRadius:'10px', border:'1px solid #1e3b48'}}>
             <input 
@@ -116,7 +116,7 @@ function App() {
     <div>
       {/* HEADER */}
       <div className="header">
-        <div className="logo-text">Okzz<span style={{color:'white', fontSize:'18px'}}>Pro</span></div>
+        <div className="logo-text">Okzz<span style={{color:'white', fontSize:'18px'}}>Pro Live</span></div>
         <div style={{color:'#fff', fontWeight:'bold', background:'#142832', padding:'5px 10px', borderRadius:'20px', border:'1px solid #00e676'}}>
             ৳ {user.balance}
         </div>
@@ -135,7 +135,7 @@ function App() {
 
             {/* NOTICE BAR */}
             <div className="notice-bar">
-                📢 Welcome to OkzzPro! Fast Deposit & Withdraw 24/7. Play and Win Big!
+                📢 Welcome to OkzzPro Live! Fast Deposit & Withdraw 24/7.
             </div>
 
             {/* QUICK ACTIONS */}
