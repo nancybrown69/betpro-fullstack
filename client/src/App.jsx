@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 
-// 🔥 LIVE SERVER LINK
-const API_URL = 'https://betpro-server.onrender.com'; 
+// 🔥 FINAL LIVE SERVER LINK
+const API_URL = 'https://betpro-server-f.onrender.com'; 
 
 function App() {
   // --- STATES ---
@@ -28,16 +28,25 @@ function App() {
   // --- API FUNCTIONS ---
 
   const handleAuth = async () => {
+    if(!username || !password) return alert("Please fill all fields!");
     try {
         const endpoint = isRegister ? '/api/register' : '/api/login';
+        // console.log("Connecting to:", API_URL + endpoint); // Debugging
         const res = await axios.post(`${API_URL}${endpoint}`, { username, password });
+        
         if (res.data.success) {
-            if (res.data.isAdmin) { setIsAdmin(true); fetchAdminData(); } 
-            else setUser(res.data.user);
-        } else alert(res.data.message);
+            if (res.data.isAdmin) { 
+                setIsAdmin(true); 
+                fetchAdminData(); 
+            } else {
+                setUser(res.data.user);
+            }
+        } else {
+            alert(res.data.message);
+        }
     } catch(e) { 
         console.error(e);
-        alert('Server Error! Check Internet.'); 
+        alert('Connection Error! Server might be sleeping. Please try again in 10 seconds.'); 
     }
   }
 
@@ -55,7 +64,10 @@ function App() {
                   setWinMessage(res.data.isWin ? `WIN: ৳${res.data.winnings}` : 'LOST');
               }
           }, 1500);
-      } catch(e) { setIsSpinning(false); }
+      } catch(e) { 
+          setIsSpinning(false); 
+          alert("Game Error! Check internet.");
+      }
   }
 
   const fetchAdminData = async () => {
@@ -65,32 +77,32 @@ function App() {
       } catch(e) { console.error(e); }
   }
 
-  // --- 1. LOGIN SCREEN (Dark Okzz Style) ---
+  // --- 1. LOGIN SCREEN ---
   if (!user && !isAdmin) {
     return (
-      <div style={{padding:'50px 20px', textAlign:'center', background:'#0b1e28', height:'100vh'}}>
-        <h1 className="logo-text" style={{fontSize:'40px', marginBottom:'40px'}}>Okzz<span style={{color:'white'}}>Pro Live</span></h1>
+      <div style={{padding:'50px 20px', textAlign:'center', background:'#0b1e28', height:'100vh', display:'flex', flexDirection:'column', justifyContent:'center'}}>
+        <h1 className="logo-text" style={{fontSize:'40px', marginBottom:'40px'}}>Okzz<span style={{color:'#00e676'}}>Pro</span></h1>
         
-        <div style={{background:'#142832', padding:'30px', borderRadius:'10px', border:'1px solid #1e3b48'}}>
+        <div style={{background:'#142832', padding:'30px', borderRadius:'10px', border:'1px solid #1e3b48', maxWidth:'400px', margin:'0 auto', width:'100%'}}>
             <input 
-                style={{background:'#0b1e28', border:'1px solid #1e3b48', color:'white', width:'100%', padding:'12px', marginBottom:'10px', borderRadius:'5px'}} 
+                style={{background:'#0b1e28', border:'1px solid #1e3b48', color:'white', width:'100%', padding:'15px', marginBottom:'15px', borderRadius:'5px', fontSize:'16px'}} 
                 placeholder="Username" 
                 onChange={e => setUsername(e.target.value)} 
             />
             <input 
                 type="password" 
-                style={{background:'#0b1e28', border:'1px solid #1e3b48', color:'white', width:'100%', padding:'12px', marginBottom:'20px', borderRadius:'5px'}} 
+                style={{background:'#0b1e28', border:'1px solid #1e3b48', color:'white', width:'100%', padding:'15px', marginBottom:'20px', borderRadius:'5px', fontSize:'16px'}} 
                 placeholder="Password" 
                 onChange={e => setPassword(e.target.value)} 
             />
             <button 
-                style={{width:'100%', padding:'12px', background:'#00e676', border:'none', fontWeight:'bold', cursor:'pointer', fontSize:'16px', borderRadius:'5px'}} 
+                style={{width:'100%', padding:'15px', background:'#00e676', border:'none', fontWeight:'bold', cursor:'pointer', fontSize:'18px', borderRadius:'5px', color:'#000'}} 
                 onClick={handleAuth}
             >
-                {isRegister ? 'REGISTER' : 'LOG IN'}
+                {isRegister ? 'REGISTER NOW' : 'LOG IN'}
             </button>
-            <p onClick={() => setIsRegister(!isRegister)} style={{marginTop:'15px', color:'#7f8c8d', cursor:'pointer'}}>
-                {isRegister ? 'Login Account' : 'Create New Account'}
+            <p onClick={() => setIsRegister(!isRegister)} style={{marginTop:'20px', color:'#fff', cursor:'pointer', textDecoration:'underline'}}>
+                {isRegister ? 'Already have an account? Login' : 'Create New Account'}
             </p>
         </div>
       </div>
@@ -102,11 +114,11 @@ function App() {
       return (
           <div style={{padding:'20px', background:'#0b1e28', minHeight:'100vh', color:'white'}}>
               <h2 style={{color:'#00e676'}}>👑 ADMIN CONTROL</h2>
-              <div style={{background:'#142832', padding:'20px', marginTop:'20px', borderRadius:'10px'}}>
-                  <p>Total Users: {adminData.users.length}</p>
-                  <p>Win Rate: {adminData.winRate}%</p>
+              <div style={{background:'#142832', padding:'20px', marginTop:'20px', borderRadius:'10px', border:'1px solid #1e3b48'}}>
+                  <p style={{fontSize:'20px'}}>Total Users: <strong>{adminData.users.length}</strong></p>
+                  <p style={{fontSize:'20px'}}>Win Rate: <strong>{adminData.winRate}%</strong></p>
               </div>
-              <button onClick={() => setIsAdmin(false)} style={{marginTop:'20px', background:'red', color:'white', padding:'10px', border:'none', width:'100%'}}>Logout</button>
+              <button onClick={() => setIsAdmin(false)} style={{marginTop:'30px', background:'#ff4757', color:'white', padding:'15px', border:'none', width:'100%', borderRadius:'5px', fontSize:'16px', fontWeight:'bold'}}>Logout</button>
           </div>
       )
   }
@@ -116,8 +128,8 @@ function App() {
     <div>
       {/* HEADER */}
       <div className="header">
-        <div className="logo-text">Okzz<span style={{color:'white', fontSize:'18px'}}>Pro Live</span></div>
-        <div style={{color:'#fff', fontWeight:'bold', background:'#142832', padding:'5px 10px', borderRadius:'20px', border:'1px solid #00e676'}}>
+        <div className="logo-text">Okzz<span style={{color:'#00e676', fontSize:'18px'}}>Pro</span></div>
+        <div style={{color:'#fff', fontWeight:'bold', background:'#142832', padding:'8px 15px', borderRadius:'20px', border:'1px solid #00e676', fontSize:'14px'}}>
             ৳ {user.balance}
         </div>
       </div>
@@ -135,7 +147,7 @@ function App() {
 
             {/* NOTICE BAR */}
             <div className="notice-bar">
-                📢 Welcome to OkzzPro Live! Fast Deposit & Withdraw 24/7.
+                📢 Welcome to OkzzPro! The trusted betting platform. Live server connected!
             </div>
 
             {/* QUICK ACTIONS */}
@@ -188,17 +200,17 @@ function App() {
                  <span>{gameResult[2]}</span>
              </div>
              
-             <div style={{color: winMessage.includes('WIN')?'#00e676':'#ff4757', fontWeight:'bold', height:'30px', fontSize:'18px'}}>
+             <div style={{color: winMessage.includes('WIN')?'#00e676':'#ff4757', fontWeight:'bold', height:'30px', fontSize:'18px', marginTop:'10px'}}>
                  {isSpinning ? 'SPINNING...' : winMessage}
              </div>
 
-             <div style={{display:'flex', justifyContent:'center', alignItems:'center', marginTop:'20px'}}>
-                 <span style={{marginRight:'10px'}}>BET:</span>
+             <div style={{display:'flex', justifyContent:'center', alignItems:'center', marginTop:'20px', gap:'10px'}}>
+                 <span style={{color:'white'}}>BET:</span>
                  <input 
                     type="number" 
                     value={bet} 
                     onChange={e=>setBet(e.target.value)} 
-                    style={{width:'100px', padding:'10px', textAlign:'center', borderRadius:'5px', border:'none'}} 
+                    style={{width:'100px', padding:'10px', textAlign:'center', borderRadius:'5px', border:'none', fontSize:'16px'}} 
                  />
              </div>
              
@@ -216,12 +228,12 @@ function App() {
               
               <div style={{background:'#142832', padding:'20px', borderRadius:'10px', marginBottom:'20px', border:'1px solid #1e3b48'}}>
                   <h3 style={{color:'#ffd700', marginBottom:'10px'}}>Deposit Method</h3>
-                  <p style={{color:'#b2bec3'}}>bKash Personal: 017xxxxxxxx</p>
-                  <p style={{color:'#b2bec3'}}>Nagad Personal: 018xxxxxxxx</p>
-                  <p style={{fontSize:'12px', color:'#7f8c8d', marginTop:'10px'}}>* Send money and contact admin to add balance.</p>
+                  <p style={{color:'#b2bec3', fontSize:'18px'}}>bKash: 017xxxxxxxx</p>
+                  <p style={{color:'#b2bec3', fontSize:'18px'}}>Nagad: 018xxxxxxxx</p>
+                  <p style={{fontSize:'12px', color:'#7f8c8d', marginTop:'15px'}}>* Send money and contact admin on WhatsApp to add balance.</p>
               </div>
 
-              <button className="primary-btn" onClick={() => alert('Contact Admin on Telegram/WhatsApp')} style={{background:'#00e676', color:'black', width:'100%', padding:'15px', border:'none', borderRadius:'5px', fontWeight:'bold'}}>
+              <button className="primary-btn" onClick={() => alert('Contact Admin on Telegram/WhatsApp')} style={{background:'#00e676', color:'black', width:'100%', padding:'15px', border:'none', borderRadius:'5px', fontWeight:'bold', fontSize:'16px'}}>
                   CONTACT SUPPORT
               </button>
           </div>
