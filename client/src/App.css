@@ -1,27 +1,56 @@
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-body { background-color: #0d1117; color: #ffffff; padding-bottom: 70px; }
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+body { background-color: #0b1e28; color: #fff; padding-bottom: 70px; }
 
 /* HEADER */
-.header { background: #161b22; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-.logo { font-size: 20px; font-weight: bold; color: #00d2d3; }
-.balance-badge { background: #21262d; padding: 5px 12px; border-radius: 20px; font-size: 14px; border: 1px solid #30363d; color: #ffd700; font-weight: bold; }
+.header { 
+  background: #0f2b36; padding: 10px 15px; 
+  display: flex; justify-content: space-between; align-items: center; 
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3); border-bottom: 1px solid #1e3b48;
+}
+.logo-text { font-size: 24px; font-weight: 900; color: #00e676; font-style: italic; }
+.login-btn { background: #00e676; color: #000; padding: 5px 15px; border-radius: 4px; font-weight: bold; border: none; }
 
-/* SLOT MACHINE */
-.slot-machine { background: #2f3542; border: 4px solid #ffd700; border-radius: 15px; padding: 15px; margin: 20px 10px; text-align: center; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-.slot-window { background: white; border-radius: 10px; padding: 10px; display: flex; justify-content: space-around; font-size: 40px; height: 90px; align-items: center; border: 3px inset #ccc; overflow: hidden; }
-.spinning .reel { animation: spinReel 0.2s infinite linear; }
-@keyframes spinReel { 0% { transform: translateY(-10px); opacity: 0.5; } 50% { transform: translateY(10px); opacity: 1; } 100% { transform: translateY(-10px); opacity: 0.5; } }
-.spin-btn { background: linear-gradient(to bottom, #ff4757, #c0392b); border: 2px solid #fff; padding: 10px 30px; font-size: 18px; font-weight: bold; border-radius: 50px; margin-top: 15px; cursor: pointer; color: white; width: 80%; }
-.spin-btn:active { transform: translateY(3px); }
+/* SLIDER / BANNER */
+.slider { margin: 10px; border-radius: 8px; overflow: hidden; position: relative; }
+.banner-img { width: 100%; height: 160px; object-fit: cover; background: linear-gradient(to right, #004d40, #00695c); display: flex; align-items: center; justify-content: center; }
+.banner-text { font-size: 20px; font-weight: bold; color: #ffd700; text-shadow: 1px 1px 5px black; }
 
-/* WALLET & ADMIN UI */
-.wallet-box { background: #21262d; padding: 15px; margin: 15px; border-radius: 10px; border: 1px solid #30363d; }
-.section-title { margin: 20px 15px 5px; font-size: 14px; color: #8b949e; text-transform: uppercase; }
-input, select { width: 100%; padding: 12px; margin: 8px 0; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; }
-button { width: 100%; padding: 10px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; color: white; }
+/* MARQUEE NOTICE */
+.notice-bar { background: #1b3a4b; color: #b2bec3; padding: 8px; font-size: 12px; white-space: nowrap; overflow: hidden; }
+
+/* ACTION BUTTONS (Deposit/Withdraw) */
+.action-row { display: flex; gap: 10px; padding: 10px; }
+.action-btn { 
+  flex: 1; padding: 12px; border-radius: 6px; border: none; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.btn-dep { background: linear-gradient(to bottom, #2ecc71, #27ae60); }
+.btn-with { background: linear-gradient(to bottom, #e74c3c, #c0392b); }
+
+/* GAME GRID (Okzz Style) */
+.section-head { display: flex; justify-content: space-between; padding: 15px 10px 5px; align-items: center; }
+.see-all { color: #00e676; font-size: 12px; }
+.game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+.game-box { 
+  background: #142832; border-radius: 8px; overflow: hidden; text-align: center; 
+  padding-bottom: 10px; border: 1px solid #1e3b48; transition: 0.2s;
+}
+.game-box:active { transform: scale(0.95); border-color: #00e676; }
+.g-img { height: 70px; background: #000; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+.g-title { font-size: 11px; color: #fff; font-weight: bold; }
 
 /* BOTTOM NAV */
-.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #161b22; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #30363d; }
-.nav-item { color: #8b949e; font-size: 12px; cursor: pointer; text-align: center; }
-.nav-item.active { color: #00d2d3; }
-.nav-icon { font-size: 20px; display: block; }
+.bottom-nav { 
+  position: fixed; bottom: 0; width: 100%; background: #0f2b36; 
+  display: flex; justify-content: space-around; padding: 10px 0; 
+  border-top: 2px solid #00e676; 
+}
+.nav-item { text-align: center; color: #7f8c8d; font-size: 10px; cursor: pointer; }
+.nav-item.active { color: #00e676; }
+.nav-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+
+/* SLOT MACHINE CUSTOM */
+.slot-area { background: #0a151b; border: 2px solid #ffd700; margin: 20px; padding: 20px; border-radius: 10px; text-align: center; }
+.slot-display { display: flex; justify-content: center; gap: 10px; font-size: 40px; margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 5px; }
+.spin-button { width: 100%; background: #ffd700; color: #000; font-weight: 900; padding: 15px; border: none; border-radius: 5px; font-size: 20px; cursor: pointer; }

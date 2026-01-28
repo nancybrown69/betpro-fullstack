@@ -1,35 +1,34 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 
+// আপনার লাইভ সার্ভার লিংক এখানে বসাবেন (যদি লোকাল হয় তবে http://localhost:5000)
+const API_URL = 'http://localhost:5000'; 
+
 function App() {
   const [user, setUser] = useState(null)
+  const [activeTab, setActiveTab] = useState('home') 
   const [isAdmin, setIsAdmin] = useState(false)
   
-  // Auth
+  // Auth States
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [isRegister, setIsRegister] = useState(false)
 
-  // Wallet
-  const [activeTab, setActiveTab] = useState('home')
-  const [depositAmount, setDepositAmount] = useState('')
-  const [withdrawAmount, setWithdrawAmount] = useState('')
-
-  // Game (Slot)
-  const [gameResult, setGameResult] = useState(['🍒', '🍋', '🔔'])
+  // Game States
+  const [gameResult, setGameResult] = useState(['🍒', '🍒', '🍒'])
   const [isSpinning, setIsSpinning] = useState(false)
   const [winMessage, setWinMessage] = useState('')
-  const [bet, setBet] = useState(10)
+  const [bet, setBet] = useState(50)
 
   // Admin Data
   const [adminData, setAdminData] = useState({ users: [], transactions: [], winRate: 40 })
 
-  // --- API CALLS ---
+  // --- API LOGIC ---
   const handleAuth = async () => {
     try {
         const endpoint = isRegister ? '/api/register' : '/api/login';
-        const res = await axios.post(`http://localhost:5000${endpoint}`, { username, password });
+        const res = await axios.post(`${API_URL}${endpoint}`, { username, password });
         if (res.data.success) {
             if (res.data.isAdmin) { setIsAdmin(true); fetchAdminData(); } 
             else setUser(res.data.user);
@@ -37,151 +36,170 @@ function App() {
     } catch(e) { alert('Server Error'); }
   }
 
-  // --- SLOT GAME LOGIC ---
   const handleSpin = async () => {
-      if(user.balance < bet) return alert("Low Balance!");
+      if(user.balance < bet) return alert("Not enough balance!");
       setIsSpinning(true); setWinMessage('');
-      
       try {
-          const res = await axios.post('http://localhost:5000/api/play-game', { username: user.username, betAmount: bet });
+          const res = await axios.post(`${API_URL}/api/play-game`, { username: user.username, betAmount: bet });
           setTimeout(() => {
               setIsSpinning(false);
               if(res.data.success) {
                   setGameResult(res.data.result);
                   setUser(res.data.user);
-                  if(res.data.isWin) setWinMessage(`🎉 WON ৳${res.data.winnings}!`);
-                  else setWinMessage('❌ Lost! Try Again.');
+                  setWinMessage(res.data.isWin ? `WIN: ৳${res.data.winnings}` : 'LOST');
               }
-          }, 2000); // 2s Animation
-      } catch(e) { setIsSpinning(false); alert("Error"); }
+          }, 1500);
+      } catch(e) { setIsSpinning(false); }
   }
 
-  // --- ADMIN FUNCTIONS ---
   const fetchAdminData = async () => {
-      const res = await axios.get('http://localhost:5000/api/admin/data');
+      const res = await axios.get(`${API_URL}/api/admin/data`);
       setAdminData(res.data);
   }
-  const changeRate = async (rate) => {
-      await axios.post('http://localhost:5000/api/admin/set-rate', { rate });
-      fetchAdminData(); alert(`Win Rate: ${rate}%`);
-  }
-  const handleBalanceEdit = async (username) => {
-      const amount = prompt(`Enter Amount for ${username} (Use - to deduct):`);
-      if(!amount) return;
-      await axios.post('http://localhost:5000/api/admin/update-balance', { username, amount });
-      fetchAdminData();
-  }
-  const handleResetPass = async (username) => {
-      const newPass = prompt(`New Password for ${username}:`);
-      if(!newPass) return;
-      await axios.post('http://localhost:5000/api/admin/reset-password', { username, newPassword: newPass });
-      alert("Password Changed!");
-  }
-  const handleDeleteUser = async (username) => {
-      if(!confirm(`Delete ${username}?`)) return;
-      await axios.post('http://localhost:5000/api/admin/delete-user', { username });
-      fetchAdminData(); alert("User Deleted!");
-  }
 
-  // --- USER WALLET ---
-  const handleDeposit = async () => {
-    if(!depositAmount) return alert("Enter Amount");
-    alert("Connecting Gateway...");
-    const res = await axios.post('http://localhost:5000/api/deposit/execute', { username: user.username, amount: depositAmount, method: 'bKash' });
-    if(res.data.success) { setUser(res.data.user); alert("✅ Verified!"); setDepositAmount(''); }
-  }
-  const handleWithdraw = async () => {
-    if(!withdrawAmount) return alert("Enter Amount");
-    alert("Processing Payout...");
-    const res = await axios.post('http://localhost:5000/api/withdraw/execute', { username: user.username, amount: withdrawAmount, method: 'bKash', number: '017...' });
-    if(res.data.success) { setUser(res.data.user); alert("✅ Sent!"); setWithdrawAmount(''); }
-  }
-
-  // --- LOGIN SCREEN ---
+  // --- 1. LOGIN PAGE (Dark Style) ---
   if (!user && !isAdmin) {
     return (
-      <div style={{padding:'40px', textAlign:'center', marginTop:'50px'}}>
-        <h1 style={{color:'#00d2d3'}}>BetPro Live</h1>
-        <div className="wallet-box">
-          <input placeholder="Username" onChange={e => setUsername(e.target.value)} />
-          <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
-          <button onClick={handleAuth} style={{background:'#00d2d3', color:'black'}}>{isRegister ? 'REGISTER' : 'LOGIN'}</button>
-          <p onClick={() => setIsRegister(!isRegister)} style={{marginTop:'15px', color:'gray'}}>{isRegister ? 'Login' : 'Create Account'}</p>
+      <div style={{padding:'50px 20px', textAlign:'center', background:'#0b1e28', height:'100vh'}}>
+        <h1 className="logo-text" style={{fontSize:'50px', marginBottom:'40px'}}>Okzz<span style={{color:'white'}}>Pro</span></h1>
+        <div style={{background:'#142832', padding:'30px', borderRadius:'10px', border:'1px solid #1e3b48'}}>
+            <input style={{background:'#0b1e28', border:'1px solid #1e3b48', color:'white', width:'100%', padding:'12px', marginBottom:'10px', borderRadius:'5px'}} 
+                   placeholder="Username" onChange={e => setUsername(e.target.value)} />
+            <input type="password" style={{background:'#0b1e28', border:'1px solid #1e3b48', color:'white', width:'100%', padding:'12px', marginBottom:'20px', borderRadius:'5px'}} 
+                   placeholder="Password" onChange={e => setPassword(e.target.value)} />
+            <button style={{width:'100%', padding:'12px', background:'#00e676', border:'none', fontWeight:'bold', cursor:'pointer'}} onClick={handleAuth}>
+                {isRegister ? 'REGISTER' : 'LOG IN'}
+            </button>
+            <p onClick={() => setIsRegister(!isRegister)} style={{marginTop:'15px', color:'#7f8c8d', cursor:'pointer'}}>
+                {isRegister ? 'Login Account' : 'Create New Account'}
+            </p>
         </div>
       </div>
     )
   }
 
-  // --- MASTER ADMIN PANEL ---
+  // --- 2. ADMIN PANEL ---
   if (isAdmin) {
       return (
-          <div>
-              <div className="header" style={{background:'#d63031'}}>
-                  <div className="logo">👑 Master Admin</div>
-                  <button onClick={() => setIsAdmin(false)} style={{background:'#2d3436', padding:'5px 10px'}}>Logout</button>
-              </div>
-              <div style={{padding:'15px'}}>
-                  <div className="wallet-box">
-                      <h3 style={{color:'yellow', textAlign:'center'}}>Win Rate: {adminData.winRate}%</h3>
-                      <div style={{display:'flex', justifyContent:'center', gap:'5px', marginTop:'10px'}}>
-                          <button onClick={()=>changeRate(0)} style={{background:'red', width:'50px'}}>0%</button>
-                          <button onClick={()=>changeRate(40)} style={{background:'orange', width:'50px'}}>40%</button>
-                          <button onClick={()=>changeRate(100)} style={{background:'green', width:'50px'}}>100%</button>
-                      </div>
-                  </div>
-                  <div className="section-title">Users</div>
-                  {adminData.users.map(u => (
-                      <div key={u._id} className="wallet-box" style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                          <div><b>{u.username}</b> <br/><small style={{color:'gold'}}>৳{u.balance}</small></div>
-                          <div style={{display:'flex', gap:'5px'}}>
-                              <button onClick={()=>handleBalanceEdit(u.username)} style={{background:'#0984e3'}}>💵</button>
-                              <button onClick={()=>handleResetPass(u.username)} style={{background:'#e17055'}}>🔑</button>
-                              <button onClick={()=>handleDeleteUser(u.username)} style={{background:'#d63031'}}>❌</button>
-                          </div>
-                      </div>
-                  ))}
-              </div>
+          <div style={{padding:'20px'}}>
+              <h2>ADMIN CONTROL</h2>
+              <p>Total Users: {adminData.users.length}</p>
+              <button onClick={() => setIsAdmin(false)} style={{background:'red', color:'white', padding:'10px'}}>Logout</button>
           </div>
       )
   }
 
-  // --- USER APP ---
+  // --- 3. MAIN APP (Okzz UI) ---
   return (
     <div>
-      <div className="header"><div className="logo">BetPro</div><div className="balance-badge">৳ {user.balance}</div></div>
-      <div style={{paddingBottom:'80px'}}>
-        {activeTab === 'home' && (
-          <>
-            <div className="banner">🎰 SUPER CASINO 🎰</div>
-            <div className="slot-machine">
-                <div className={`slot-window ${isSpinning?'spinning':''}`}>
-                    <div className="reel">{gameResult[0]}</div><div className="reel">{gameResult[1]}</div><div className="reel">{gameResult[2]}</div>
-                </div>
-                <div style={{marginTop:'10px', color: winMessage.includes('WON')?'#2ecc71':'#ff7675'}}>{winMessage}</div>
-                <div style={{display:'flex', justifyContent:'center', alignItems:'center', gap:'10px', marginTop:'10px'}}>
-                    <span>BET:</span><input type="number" value={bet} onChange={e=>setBet(e.target.value)} style={{width:'60px', textAlign:'center', margin:0}} />
-                </div>
-                <button className="spin-btn" onClick={handleSpin} disabled={isSpinning}>{isSpinning?'...':'SPIN'}</button>
-            </div>
-          </>
-        )}
-        {activeTab === 'wallet' && (
-          <>
-            <div className="wallet-box">
-              <h3>Deposit</h3><input type="number" placeholder="Amount" onChange={e=>setDepositAmount(e.target.value)} />
-              <button onClick={handleDeposit} style={{background:'#238636'}}>PAY WITH BKASH</button>
-            </div>
-            <div className="wallet-box" style={{border:'1px solid #da3633'}}>
-              <h3>Withdraw</h3><input type="number" placeholder="Amount" onChange={e=>setWithdrawAmount(e.target.value)} />
-              <button onClick={handleWithdraw} style={{background:'#da3633'}}>WITHDRAW</button>
-            </div>
-          </>
-        )}
+      {/* HEADER */}
+      <div className="header">
+        <div className="logo-text">Okzz<span style={{color:'white', fontSize:'18px'}}>Pro</span></div>
+        <div style={{color:'#fff', fontWeight:'bold'}}>৳ {user.balance}</div>
       </div>
+
+      <div style={{paddingBottom:'80px'}}>
+      
+      {activeTab === 'home' && (
+        <>
+            {/* SLIDER */}
+            <div className="slider">
+                <div className="banner-img">
+                    <div className="banner-text">WELCOME BONUS 100%</div>
+                </div>
+            </div>
+
+            {/* NOTICE */}
+            <div className="notice-bar">
+                📢 Welcome to OkzzPro! Deposit now via bKash/Nagad and get 5% extra bonus! Withdrawal time 10AM - 10PM.
+            </div>
+
+            {/* QUICK ACTIONS */}
+            <div className="action-row">
+                <button className="action-btn btn-dep" onClick={()=>alert('Use Wallet Tab')}>📥 Deposit</button>
+                <button className="action-btn btn-with" onClick={()=>alert('Use Wallet Tab')}>📤 Withdraw</button>
+            </div>
+
+            {/* LIVE GAMES */}
+            <div className="section-head">
+                <span style={{color:'white', fontWeight:'bold'}}>🔥 Popular Games</span>
+                <span className="see-all">See All</span>
+            </div>
+            <div className="game-grid">
+                <div className="game-box" onClick={() => setActiveTab('casino')}>
+                    <div className="g-img">🎰</div>
+                    <div className="g-title">SLOT</div>
+                </div>
+                <div className="game-box">
+                    <div className="g-img">✈️</div>
+                    <div className="g-title">CRASH</div>
+                </div>
+                <div className="game-box">
+                    <div className="g-img">⚽</div>
+                    <div className="g-title">SPORTS</div>
+                </div>
+                <div className="game-box">
+                    <div className="g-img">🃏</div>
+                    <div className="g-title">TEEN PATTI</div>
+                </div>
+                <div className="game-box">
+                    <div className="g-img">🎡</div>
+                    <div className="g-title">WHEEL</div>
+                </div>
+                <div className="game-box">
+                    <div className="g-img">🎲</div>
+                    <div className="g-title">LUDO</div>
+                </div>
+            </div>
+        </>
+      )}
+
+      {/* SLOT MACHINE PAGE */}
+      {activeTab === 'casino' && (
+          <div className="slot-area">
+             <div style={{color:'white', marginBottom:'20px'}}>SUPER JACKPOT</div>
+             <div className="slot-display">
+                 <span>{gameResult[0]}</span><span>{gameResult[1]}</span><span>{gameResult[2]}</span>
+             </div>
+             <div style={{color: winMessage.includes('WIN')?'#00e676':'red', fontWeight:'bold', height:'30px'}}>
+                 {isSpinning ? '...' : winMessage}
+             </div>
+             <input type="number" value={bet} onChange={e=>setBet(e.target.value)} style={{width:'80px', padding:'5px', margin:'10px', textAlign:'center'}} />
+             <button className="spin-button" onClick={handleSpin} disabled={isSpinning}>SPIN NOW</button>
+          </div>
+      )}
+
+      {/* WALLET PAGE */}
+      {activeTab === 'wallet' && (
+          <div style={{padding:'20px', textAlign:'center'}}>
+              <h2 style={{color:'white'}}>My Wallet</h2>
+              <h1 style={{color:'#00e676', fontSize:'40px', margin:'20px 0'}}>৳ {user.balance}</h1>
+              <div style={{background:'#142832', padding:'20px', borderRadius:'10px'}}>
+                  <p style={{color:'#b2bec3'}}>bKash Personal: 017xxxxxxxx</p>
+                  <p style={{color:'#b2bec3'}}>Nagad Personal: 018xxxxxxxx</p>
+              </div>
+          </div>
+      )}
+
+      </div>
+
+      {/* BOTTOM NAV */}
       <div className="bottom-nav">
-        <div className={`nav-item ${activeTab==='home'?'active':''}`} onClick={()=>setActiveTab('home')}><span className="nav-icon">🏠</span>Home</div>
-        <div className={`nav-item ${activeTab==='wallet'?'active':''}`} onClick={()=>setActiveTab('wallet')}><span className="nav-icon">💰</span>Wallet</div>
-        <div className="nav-item" onClick={()=>setUser(null)}><span className="nav-icon">🚪</span>Exit</div>
+          <div className={`nav-item ${activeTab==='home'?'active':''}`} onClick={()=>setActiveTab('home')}>
+              <span className="nav-icon">🏠</span>Home
+          </div>
+          <div className="nav-item">
+              <span className="nav-icon">🏆</span>Sports
+          </div>
+          <div className={`nav-item ${activeTab==='casino'?'active':''}`} onClick={()=>setActiveTab('casino')}>
+              <span className="nav-icon">🎰</span>Casino
+          </div>
+          <div className={`nav-item ${activeTab==='wallet'?'active':''}`} onClick={()=>setActiveTab('wallet')}>
+              <span className="nav-icon">💰</span>Wallet
+          </div>
+          <div className="nav-item" onClick={()=>setUser(null)}>
+              <span className="nav-icon">👤</span>Account
+          </div>
       </div>
     </div>
   )
